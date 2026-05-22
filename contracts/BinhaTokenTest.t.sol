@@ -38,7 +38,7 @@ contract BinhaTokenTest is Test {
     function testSymbol() public view {
         require(
             compareString(token.symbol(), "BIN"),
-            "TOKEN NAME IS INCORRECT"
+            "TOKEN SYMBOL IS INCORRECT"
         );
     }
 
@@ -49,7 +49,7 @@ contract BinhaTokenTest is Test {
 
     // Testing the totalSupply() function
     function testTotalSupply() public {
-        assertEq(token.totalSupply(), 1_000_000_000 * uint256(10 ** token.decimals()));
+        assertEq(token.totalSupply(), 1_000_000_000 * bin);
     }
 
     // Testing the balanceOf() function
@@ -57,8 +57,8 @@ contract BinhaTokenTest is Test {
         assertEq(token.balanceOf(owner), token.totalSupply());
     }
 
-    // Testing the transfer() function
-    function testTransfer() public {
+    // Testing the transfer() function when it is supposed to work.
+    function testHappyTransfer() public {
         address nick = address(0x123);
         address playmobil = address (0x789);
 
@@ -83,8 +83,8 @@ contract BinhaTokenTest is Test {
         assertEq(token.balanceOf(owner), owner_balance);
     }
 
-    // Function to test allownce() and approve()
-    function testAllowanceAndApprove() public {
+    // Function to test allownce() and approve() when it is supposed to work.
+    function testHappyAllowanceAndApprove() public {
         address target = address(0x111);
         uint256 amount = 2_000 * bin;
         
@@ -96,8 +96,8 @@ contract BinhaTokenTest is Test {
         assertEq(token.allowance(owner, target), amount);
     }
 
-    // Function to test transferFrom()
-    function testTransferFrom() public {
+    // Function to test transferFrom() when it is supposed to work.
+    function testHappyTransferFrom() public {
         address someone = address(0x109);
         uint256 allowed = 3_000 * bin;
         uint256 spend = 1_500 * bin;
@@ -118,5 +118,41 @@ contract BinhaTokenTest is Test {
         );
         assertEq(token.balanceOf(chillGuy), spend);
         assertEq(token.balanceOf(owner), token.totalSupply() - spend);
+    }
+
+    // Function testBadTransfer() tests scenarios where the 
+    // transfer should not occur.
+    function testBadTransfer() public {
+        address mark = address(0x192);
+        address jane = address(0x912);
+        address cecil = address(0x111);
+        uint256 amount = 1_000_500_000 * bin;
+
+        vm.expectRevert();
+        token.transfer(mark, amount);
+
+        amount = amount / 2;
+        token.transfer(jane, amount);
+
+        amount = amount * 4;
+        vm.expectRevert();
+        token.transfer(cecil, amount);
+    }
+
+    // Function testBadTransferFrom() tests scenarios where
+    // the transfer should not happen.
+    function testBadTransferFrom() public {
+        address ian = address(0x564);
+        address jonas = address(0x873);
+        uint256 allowance = 1_000_000_900 * bin;
+
+        token.approve(ian, allowance);
+
+        allowance = allowance / 4;
+        token.approve(jonas, allowance);
+
+        vm.prank(jonas);
+        vm.expectRevert();
+        token.transferFrom(owner, ian, allowance * 9);
     }
 }
