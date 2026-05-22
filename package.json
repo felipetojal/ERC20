@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@types/node": "^22.19.19",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.7",
     "hardhat": "^3.5.1",
     "typescript": "~6.0.3"
   },
